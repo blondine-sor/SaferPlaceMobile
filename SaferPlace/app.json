@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "SaferPlace",
+    "slug": "SaferPlace",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/saferp_icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/saferp_icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.blond27.SaferPlace"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/saferp_icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/saferp_icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "54055c06-ca17-4b80-a8a8-f25a808a67e1"
+      }
+    }
+  }
+}
