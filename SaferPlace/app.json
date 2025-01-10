@@ -8,6 +8,11 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/saferp_icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -15,8 +20,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/saferp_icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.blond27.SaferPlace"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -24,24 +28,10 @@
       "favicon": "./assets/images/saferp_icon.png"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/saferp_icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ]
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "eas": {
-        "projectId": "54055c06-ca17-4b80-a8a8-f25a808a67e1"
-      }
     }
   }
 }
