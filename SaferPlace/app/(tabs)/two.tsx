@@ -2,13 +2,20 @@ import { StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
+import MultiInput from '@/components/Outils';
 
 export default function TabTwoScreen() {
+  //temporary submission function
+  const handleSubmit = (text: string) => {
+    console.log('Submitted:', text);
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tab Two</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/two.tsx" />
+      <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+      <MultiInput onSubmit={handleSubmit} />
+    </View>
     </View>
   );
 }
