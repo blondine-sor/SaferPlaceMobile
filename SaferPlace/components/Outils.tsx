@@ -1,146 +1,135 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   StyleSheet, 
   View, 
   TextInput, 
   TouchableOpacity, 
   Text,
-  Platform,
   Alert
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { Audio } from 'expo-av';
 
-interface MultiInputProps {
-  onSubmit: (text: string) => void;
+interface UploadedFile {
+  type: 'document' | 'audio';
+  uri: string;
+  name: string;
+}
+
+interface MultiUploadInputProps {
+  onSubmit: (text: string, file?: UploadedFile) => void;
   placeholder?: string;
 }
 
-const MultiInput: React.FC<MultiInputProps> = ({ 
+const MultiUploadInput: React.FC<MultiUploadInputProps> = ({ 
   onSubmit, 
   placeholder = "Type your message..." 
 }) => {
   const [inputText, setInputText] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hasRecording, setHasRecording] = useState(false);
-  const inputRef = useRef<TextInput>(null);
 
-  // Handle text upload
-  const handleFileUpload = async () => {
+  const pickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: 'text/*',
+        type: '*/*',
         copyToCacheDirectory: true
       });
 
-      if (!result.canceled && 'name' in result) {
-        setInputText(`File uploaded: ${result.name}`);
-        setHasRecording(false);
+      if (!result.canceled) {
+        // Clear any existing audio
         if (sound) {
           await sound.unloadAsync();
           setSound(null);
         }
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to upload file');
-    }
-  };
 
-  // Handle audio recording
-  const startRecording = async () => {
-    try {
-      if (sound) {
-        await sound.unloadAsync();
-        setSound(null);
-      }
-      
-      const permission = await Audio.requestPermissionsAsync();
-      if (permission.status === 'granted') {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
+        setUploadedFile({
+          type: 'document',
+          uri: result.assets[0].uri,
+          name: result.assets[0].name
         });
-
-        const { recording } = await Audio.Recording.createAsync(
-          Audio.RecordingOptionsPresets.HIGH_QUALITY
-        );
-
-        setRecording(recording);
-        setIsRecording(true);
-        setHasRecording(false);
-        setInputText('Recording...');
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to start recording');
+      Alert.alert('Error', 'Failed to upload document');
     }
   };
 
-  const stopRecording = async () => {
+  const pickAudio = async () => {
     try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-        const uri = recording.getURI();
-        setIsRecording(false);
-        setRecording(null);
-        setHasRecording(true);
-        setInputText('Audio recorded and ready to play');
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'audio/*',
+        copyToCacheDirectory: true
+      });
+
+      if (!result.canceled) {
+        // Clear any existing audio
+        if (sound) {
+          await sound.unloadAsync();
+          setSound(null);
+        }
+
+        // Create new sound object
         
-        // Create sound object for playback
-        if(uri){
- 
         const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri },
+          { uri: result.assets[0].uri },
           { shouldPlay: false }
         );
-        setSound(newSound);
 
-        // Add playback status listener
+        // Set up audio playback status monitoring
         newSound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded && !status.isPlaying) {
             setIsPlaying(false);
           }
         });
+
+        setSound(newSound);
+        setUploadedFile({
+          type: 'audio',
+          uri: result.assets[0].uri,
+          name: result.assets[0].name
+        });
       }
-    }
+    
     } catch (error) {
-      Alert.alert('Error', 'Failed to stop recording');
+      Alert.alert('Error', 'Failed to upload audio');
     }
   };
 
-  // Handle audio playback
-  const handlePlayback = async () => {
+  const handlePlayPause = async () => {
+    if (!sound) return;
+
     try {
-      if (sound) {
-        if (isPlaying) {
-          await sound.pauseAsync();
-          setIsPlaying(false);
-        } else {
-          await sound.replayAsync();
-          setIsPlaying(true);
-        }
+      if (isPlaying) {
+        await sound.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        await sound.playAsync();
+        setIsPlaying(true);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to play audio');
     }
   };
 
+  const clearUpload = async () => {
+    if (sound) {
+      await sound.unloadAsync();
+      setSound(null);
+    }
+    setUploadedFile(null);
+  };
+
   const handleSubmit = () => {
-    if (inputText.trim()) {
-      onSubmit(inputText);
+    if (inputText.trim() || uploadedFile) {
+      onSubmit(inputText, uploadedFile || undefined);
       setInputText('');
-      setHasRecording(false);
-      if (sound) {
-        sound.unloadAsync();
-        setSound(null);
-      }
+      clearUpload();
     }
   };
 
-  // Cleanup
+  // Cleanup on unmount
   React.useEffect(() => {
     return () => {
       if (sound) {
@@ -151,55 +140,73 @@ const MultiInput: React.FC<MultiInputProps> = ({
 
   return (
     <View style={styles.container}>
+      {uploadedFile && (
+        <View style={styles.uploadPreview}>
+          <View style={styles.uploadInfo}>
+            <FontAwesome 
+              name={uploadedFile.type === 'audio' ? 'music' : 'file'} 
+              size={16} 
+              color="#666" 
+            />
+            <Text style={styles.fileName} numberOfLines={1}>
+              {uploadedFile.name}
+            </Text>
+          </View>
+          
+          <View style={styles.uploadActions}>
+            {uploadedFile.type === 'audio' && (
+              <TouchableOpacity 
+                style={styles.playButton} 
+                onPress={handlePlayPause}
+              >
+                <FontAwesome 
+                  name={isPlaying ? 'pause' : 'play'} 
+                  size={16} 
+                  color="#4A90E2" 
+                />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity 
+              style={styles.clearButton} 
+              onPress={clearUpload}
+            >
+              <FontAwesome name="times" size={16} color="#FF3B30" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       <View style={styles.inputContainer}>
         <TextInput
-          ref={inputRef}
           style={styles.input}
           value={inputText}
-          onChangeText={(text) => {
-            setInputText(text);
-            setHasRecording(false);
-          }}
+          onChangeText={setInputText}
           placeholder={placeholder}
           multiline
         />
         
-        <View style={styles.actionsContainer}>
-          {hasRecording && (
-            <TouchableOpacity 
-              style={styles.iconButton}
-              onPress={handlePlayback}
-            >
-              <FontAwesome 
-                name={isPlaying ? "pause" : "play"} 
-                size={20} 
-                color="#4A90E2" 
-              />
-            </TouchableOpacity>
-          )}
+        <View style={styles.actions}>
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={pickDocument}
+          >
+            <FontAwesome name="file" size={20} color="#359356" />
+          </TouchableOpacity>
 
           <TouchableOpacity 
             style={styles.iconButton} 
-            onPress={handleFileUpload}
+            onPress={pickAudio}
           >
-            <FontAwesome name="file-text-o" size={20} color="#4A90E2" />
+            <FontAwesome name="music" size={20} color="#359356" />
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.iconButton}
-            onPress={isRecording ? stopRecording : startRecording}
-          >
-            <FontAwesome 
-              name={isRecording ? "stop-circle" : "microphone"} 
-              size={20} 
-              color={isRecording ? "#FF3B30" : "#4A90E2"} 
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.sendButton, !inputText && styles.sendButtonDisabled]}
+            style={[
+              styles.sendButton, 
+              (!inputText && !uploadedFile) && styles.sendButtonDisabled
+            ]}
             onPress={handleSubmit}
-            disabled={!inputText}
+            disabled={!inputText && !uploadedFile}
           >
             <FontAwesome name="send" size={20} color="white" />
           </TouchableOpacity>
@@ -217,31 +224,30 @@ const styles = StyleSheet.create({
     borderTopColor: '#e0e0e0',
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
     backgroundColor: '#f8f8f8',
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
   },
   input: {
-    flex: 1,
     fontSize: 16,
     maxHeight: 100,
-    marginRight: 10,
+    minHeight: 40,
     paddingTop: 8,
     paddingBottom: 8,
   },
-  actionsContainer: {
+  actions: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 8,
   },
   iconButton: {
     padding: 8,
     marginHorizontal: 4,
   },
   sendButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#359356',
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -250,8 +256,40 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   sendButtonDisabled: {
-    backgroundColor: '#B4D2F4',
+    backgroundColor: '#96c3a6',
+  },
+  uploadPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  uploadInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  fileName: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+  uploadActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  playButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  clearButton: {
+    padding: 8,
   },
 });
 
-export default MultiInput;
+export default MultiUploadInput;
