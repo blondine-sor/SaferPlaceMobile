@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, StyleSheet } from 'react-native';
+import { Button, StyleSheet, TouchableOpacity } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
@@ -7,11 +7,13 @@ import MultiUploadInput from '@/components/Outils';
 import UserFormModal from '@/components/User';
 import { UploadedFile, UserFormData, AlertVariant } from '@/scripts/interfaces';
 import Alert from '@/components/Alerte';
+import LoginScreen from '@/components/UserConnection';
 
 export default function TabTwoScreen() {
 
  
   const [modalVisible, setModalVisible] = useState(false);
+  const [loginVisible, setLoginVisible] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [variant, setVariant] = useState<AlertVariant>('success');
@@ -81,7 +83,7 @@ export default function TabTwoScreen() {
   return (
     <View style={styles.container}>
        <View style={{ flex: 1, alignItems:'flex-end' }}>
-      <Button title="Add User" color={'#44d575'} onPress={() => setModalVisible(true)} />
+      <Button title="New User" color={'#44d575'} onPress={() => setModalVisible(true)} />
       
       <UserFormModal
         visible={modalVisible}
@@ -98,8 +100,12 @@ export default function TabTwoScreen() {
                   style={styles.getStartedText}
                   lightColor="rgba(0,0,0,0.8)"
                   darkColor="rgba(255,255,255,0.8)">
-                  Create an account to use all the features of the app
+                  Login to use all the features of the app
         </Text>
+        <TouchableOpacity onPress={() => setLoginVisible(true)}>
+          <Text style={styles.getStartedText}> Sign-in Here</Text>
+        <LoginScreen visible={loginVisible} onClose={() => setLoginVisible(false)} />
+        </TouchableOpacity>
       </View>
       {/* Multiupload form for user to enter text document or audio to be verified */}
       <View style={{ flex: 1, justifyContent: 'flex-end' }}>
