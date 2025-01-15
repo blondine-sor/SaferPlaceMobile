@@ -10,12 +10,8 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { Audio } from 'expo-av';
+import { UploadedFile } from '@/scripts/interfaces';
 
-interface UploadedFile {
-  type: 'document' | 'audio';
-  uri: string;
-  name: string;
-}
 
 interface MultiUploadInputProps {
   onSubmit: (text: string, file?: UploadedFile) => void;

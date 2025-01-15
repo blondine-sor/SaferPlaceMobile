@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Animated, Dimensions } from 'react-native';
+import { Messages } from '@/scripts/interfaces';
 
-interface Message {
-  id: string | number;
-  title: string;
-  content: string;
-}
 
 interface MessageCardProps {
-  messages: Message[];
+  messages: Messages[];
   interval?: number;
   cardStyle?: object;
 }
