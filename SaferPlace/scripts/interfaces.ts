@@ -19,6 +19,7 @@
   }
 
   type AlertVariant = 'info' | 'success' | 'warning' | 'error';
+  type LabelType = 'toxic' | 'not_toxic';
 
   interface UserInfo{
     id: number;
@@ -28,4 +29,4 @@
     authorization: string;
   }
 
-  export{ UserFormData, UploadedFile, Messages, AlertVariant, UserInfo };
+  export{ UserFormData, UploadedFile, Messages, AlertVariant, UserInfo, LabelType};

@@ -6,10 +6,12 @@ import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import MultiUploadInput from '@/components/Outils';
 import UserFormModal from '@/components/User';
-import { UploadedFile, UserFormData, AlertVariant } from '@/scripts/interfaces';
+import { UploadedFile, UserFormData, AlertVariant,LabelType } from '@/scripts/interfaces';
 import Alert from '@/components/Alerte';
 import LoginScreen from '@/components/UserConnection';
 import { useAuth } from '@/context/AuthContex';
+import EmergencyModal from '@/components/Verification';
+import { set } from 'mongoose';
 
 export default function TabTwoScreen() {
 
@@ -17,10 +19,14 @@ export default function TabTwoScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loginVisible, setLoginVisible] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
+  const [verifVisible, setVerifVisible] = useState(false);
+  const [label, setLabel] = useState<LabelType>('not_toxic');
+  const [accuracy, setAccuracy] = useState(0);
   const [title, setTitle] = useState('');
   const [variant, setVariant] = useState<AlertVariant>('success');
   const [message, setMessage] = useState('');
   const { userInfo } = useAuth();
+
 
   //text submission
   const handleSubmit = (texts: string, file?: UploadedFile) => {
@@ -33,7 +39,10 @@ export default function TabTwoScreen() {
         body: JSON.stringify({ text: texts }),
       })
         .then(response => response.json())
-        .then(data => console.log(data))
+        .then(data =>{ 
+          console.log(data)
+        setLabel(data.label);
+        setAccuracy(data.accuracy);})
         .catch(error => console.error("Error:", error));
     }
     if (file) {
@@ -132,9 +141,16 @@ export default function TabTwoScreen() {
         message={message}
         duration={5000}
         onDismiss={() => setAlertVisible(false)}
-      />
-    )
-}
+      />)}
+      {/** Emergency Modal shown when the text is toxic or not */}
+      <EmergencyModal
+        visible={verifVisible}
+        onClose={() => setVerifVisible(false)}
+        label={label}
+        accuracy={accuracy}
+        />
+    
+
    
     </View>
   );
