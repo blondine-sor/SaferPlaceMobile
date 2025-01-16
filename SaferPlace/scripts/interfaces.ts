@@ -20,4 +20,12 @@
 
   type AlertVariant = 'info' | 'success' | 'warning' | 'error';
 
-  export{ UserFormData, UploadedFile, Messages, AlertVariant };
+  interface UserInfo{
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    authorization: string;
+  }
+
+  export{ UserFormData, UploadedFile, Messages, AlertVariant, UserInfo };

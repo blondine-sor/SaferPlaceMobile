@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button, StyleSheet, TouchableOpacity } from 'react-native';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
@@ -8,6 +9,7 @@ import UserFormModal from '@/components/User';
 import { UploadedFile, UserFormData, AlertVariant } from '@/scripts/interfaces';
 import Alert from '@/components/Alerte';
 import LoginScreen from '@/components/UserConnection';
+import { useAuth } from '@/context/AuthContex';
 
 export default function TabTwoScreen() {
 
@@ -18,6 +20,7 @@ export default function TabTwoScreen() {
   const [title, setTitle] = useState('');
   const [variant, setVariant] = useState<AlertVariant>('success');
   const [message, setMessage] = useState('');
+  const { userInfo } = useAuth();
 
   //text submission
   const handleSubmit = (texts: string, file?: UploadedFile) => {
@@ -92,7 +95,9 @@ export default function TabTwoScreen() {
       />
     </View>
     <View style={{flex: 1, alignItems:'center'}}>
-      <Text style={styles.title}>Hello User</Text>
+      {/* Shows the connected user's name  */}
+      {userInfo && <Text style={styles.title}>Hello {userInfo.name}</Text>}
+      {!userInfo && <Text style={styles.title}>Hello User</Text>}
       </View>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <View>
@@ -102,14 +107,22 @@ export default function TabTwoScreen() {
                   darkColor="rgba(255,255,255,0.8)">
                   Login to use all the features of the app
         </Text>
-        <TouchableOpacity onPress={() => setLoginVisible(true)}>
-          <Text style={styles.getStartedText}> Sign-in Here</Text>
+        <TouchableOpacity onPress={() => setLoginVisible(true)} style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <Text style={styles.getStartedText} 
+                lightColor="rgb(36, 160, 11)"
+                darkColor="rgba(255,255,255,0.8)"
+                selectionColor={'#9ee58e'} > 
+                Sign-in Here
+          </Text>
+          <FontAwesome5 name="hand-point-left" size={24} color="#9ee58e" />
         <LoginScreen visible={loginVisible} onClose={() => setLoginVisible(false)} />
         </TouchableOpacity>
       </View>
       {/* Multiupload form for user to enter text document or audio to be verified */}
       <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+        {userInfo &&
       <MultiUploadInput onSubmit={handleSubmit} />
+      }
     </View>
     {/** Alert component shown when the request is successful */}
     {alertVisible && (
@@ -144,5 +157,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 24,
     textAlign: 'center',
+    marginEnd: 10,
   },
 });

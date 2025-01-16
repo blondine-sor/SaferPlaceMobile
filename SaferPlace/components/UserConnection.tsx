@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, Alert, StyleSheet, Modal, KeyboardAvoidi
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
 import axios from 'axios';
+import { useAuth } from '@/context/AuthContex';
 
 interface LoginScreenProps {
   visible: boolean;
@@ -12,6 +13,7 @@ interface LoginScreenProps {
 const LoginScreen: React.FC<LoginScreenProps> = ({ visible, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
 
 
 //   const login = async (username, password) => {
@@ -37,13 +39,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ visible, onClose }) => {
   
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://192.168.2.11:8000/login', {
-        'email': email,
-        'password': password
-      });
-
-      const data = response.data;
-      console.log(data);
+      
+      login(email, password);
       setEmail('');
       setPassword('');
       onClose();
