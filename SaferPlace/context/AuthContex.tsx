@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext } from 'react';
 import apiClient from '../utils/apiClient';
 import { deleteToken, saveToken, saveUserInfo } from '../utils/secureStorage';
-import { UserInfo } from '@/scripts/interfaces';
+import { UserInfo, Contacts } from '@/scripts/interfaces';
 
 
 
@@ -11,6 +11,7 @@ import { UserInfo } from '@/scripts/interfaces';
     userInfo: UserInfo | null;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
+    contactsInfo: Contacts | null;
   }
   
   const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -18,12 +19,13 @@ import { UserInfo } from '@/scripts/interfaces';
   export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [contactsInfo, setContactsInfo] = useState<Contacts | null>(null);
   
     const login = async (email: string, password: string) => {
         try {
           const response = await apiClient.post('/login', { email, password });
-          console.log('Login successful:', response.data.user);
-          const { access_token, expires, user } = response.data;
+          console.log('Login successful:', response.data.user,response.data.contacts);
+          const { access_token, expires, user, contacts } = response.data;
       
           // Save token
           await saveToken(access_token);
@@ -36,9 +38,14 @@ import { UserInfo } from '@/scripts/interfaces';
             phone: user.phone,
             authorization: user.authorization,
             isActive: user.is_active,
+            
           };
+
+          const contactsInfo = {
+            contacts: contacts
+          }
           await saveUserInfo(userInfo);
-      
+          setContactsInfo(contactsInfo);
           setUserInfo(userInfo);
           setIsAuthenticated(true);
         } catch (error) {
@@ -52,13 +59,14 @@ import { UserInfo } from '@/scripts/interfaces';
         await deleteToken();
         setUserInfo(null);
         setIsAuthenticated(false);
+        setContactsInfo(null);
       } catch (error) {
         console.error('Logout failed', error);
       }
     };
   
     return (
-      <AuthContext.Provider value={{ isAuthenticated, userInfo, login, logout }}>
+      <AuthContext.Provider value={{ isAuthenticated, userInfo, login, logout, contactsInfo }}>
         {children}
       </AuthContext.Provider>
     );

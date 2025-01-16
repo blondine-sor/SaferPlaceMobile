@@ -28,5 +28,8 @@
     phone: string;
     authorization: string;
   }
+  interface Contacts{
+    contacts: [] | string
+  }
 
-  export{ UserFormData, UploadedFile, Messages, AlertVariant, UserInfo, LabelType};
+  export{ UserFormData, UploadedFile, Messages, AlertVariant, UserInfo, LabelType, Contacts};

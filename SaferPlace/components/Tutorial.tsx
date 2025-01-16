@@ -41,18 +41,18 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ visible, onClose }) => {
 
   const tutorialContent = [
     {
-      title: "Welcome to Our App",
+      title: "Welcome to SaferPlace",
       description: "Discover how to make the most of our features with this quick tutorial.",
       icon: "rocket"
     },
     {
       title: "Key Features",
-      description: "Learn about our powerful tools and how they can help streamline your workflow.",
+      description: "Our powerful tools in VerifyMessages helps you check your text, audio and documents for any toxic content",
       icon: "star"
     },
     {
       title: "Get Started",
-      description: "You're all set! Start exploring the app and reach out if you need help.",
+      description: "You can add emergency contacts with the Add Contact feature on the top right corner of the app",
       icon: "check-circle"
     }
   ];

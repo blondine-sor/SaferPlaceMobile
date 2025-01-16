@@ -42,7 +42,8 @@ export default function TabTwoScreen() {
         .then(data =>{ 
           console.log(data)
         setLabel(data.label);
-        setAccuracy(data.accuracy);})
+        setAccuracy(data.accuracy);
+       setVerifVisible(true);})
         .catch(error => console.error("Error:", error));
     }
     if (file) {
@@ -129,8 +130,11 @@ export default function TabTwoScreen() {
       </View>
       {/* Multiupload form for user to enter text document or audio to be verified */}
       <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-        {userInfo &&
+        {userInfo && userInfo.authorization === 'true' &&
       <MultiUploadInput onSubmit={handleSubmit} />
+      }
+      {userInfo && userInfo.authorization === 'false' &&
+      <Text style={styles.getStartedText}>We need your authorization to verify your messages</Text>
       }
     </View>
     {/** Alert component shown when the request is successful */}

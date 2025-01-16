@@ -31,6 +31,14 @@ export default function TabLayout() {
         options={{
           title: 'SaferPlace',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+         
+        }}
+      />
+      <Tabs.Screen
+        name="two"
+        options={{
+          title: 'Verify Mesages',
+          tabBarIcon: ({ color }) => <TabBarIcon name="folder" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable>
@@ -45,13 +53,6 @@ export default function TabLayout() {
               </Pressable>
             </Link>
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Verify Mesages',
-          tabBarIcon: ({ color }) => <TabBarIcon name="folder" color={color} />,
         }}
       />
     </Tabs>
