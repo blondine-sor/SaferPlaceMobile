@@ -28,8 +28,20 @@
     phone: string;
     authorization: string;
   }
+
+  interface EmergencyContact {
+    id: number;
+    name: string;
+    phone: string;
+    user_id: number;
+    niveau: 'high' | 'medium' | 'low';
+}
   interface Contacts{
+    map(arg0: any): import("react").ReactNode;
+    
     contacts: [] | string
   }
 
-  export{ UserFormData, UploadedFile, Messages, AlertVariant, UserInfo, LabelType, Contacts};
+  
+
+  export{ UserFormData, UploadedFile, Messages, AlertVariant, UserInfo, LabelType, Contacts, EmergencyContact};

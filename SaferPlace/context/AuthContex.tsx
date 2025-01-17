@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext } from 'react';
 import apiClient from '../utils/apiClient';
 import { deleteToken, saveToken, saveUserInfo } from '../utils/secureStorage';
-import { UserInfo, Contacts } from '@/scripts/interfaces';
+import { UserInfo, Contacts, EmergencyContact} from '@/scripts/interfaces';
 
 
 
@@ -41,11 +41,16 @@ import { UserInfo, Contacts } from '@/scripts/interfaces';
             
           };
 
-          const contactsInfo = {
-            contacts: contacts
-          }
+          
           await saveUserInfo(userInfo);
-          setContactsInfo(contactsInfo);
+          const contactInfo = contacts.map((contact: EmergencyContact) => ({
+            id: contact.id,
+            user_id: contact.user_id,
+            name: contact.name,
+            phone: contact.phone,
+            niveau: contact.niveau,
+          }));
+          setContactsInfo(contactInfo);
           setUserInfo(userInfo);
           setIsAuthenticated(true);
         } catch (error) {

@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContex';
-import { set } from 'mongoose';
+
+
 
 interface EmergencyContact {
-    id: string;
+    id: number;
     name: string;
     phone: string;
     user_id: number;
-    level: 'high' | 'medium' | 'low';
+    niveau: 'high' | 'medium' | 'low';
 }
 
 const EmergencyContactForm = () => {
@@ -17,9 +18,9 @@ const EmergencyContactForm = () => {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [selectedLevel, setSelectedLevel] = useState<'high' | 'medium' | 'low'>('medium');
-    const { userInfo } = useAuth();
+    const { userInfo, contactsInfo } = useAuth();
 
-    const handleAddContact = () => {
+    const handleAddContact = async() => {
         if (contacts.length >= 5) {
             Alert.alert('Maximum Limit Reached', 'You can only add up to 5 emergency contacts.');
             return;
@@ -36,12 +37,33 @@ const EmergencyContactForm = () => {
         }
 
         const newContact: EmergencyContact = {
-            id: Date.now().toString(),
+            id: 0,
             name,
             phone,
             user_id: userInfo.id,
-            level: selectedLevel,
+            niveau: selectedLevel,
         };
+
+        const n_contact = {
+            name,
+            phone,
+            user_id: userInfo.id,
+            niveau: selectedLevel,
+        }
+        try{
+
+        
+        const response = await fetch('http://192.168.2.11:8000/add_emergency_contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(n_contact),
+        });
+        console.log('response:', response.status);
+    } catch (error) {
+        console.error('Failed to add emergency contact:', error);
+    }
 
         setContacts([...contacts, newContact]);
         setName('');
@@ -49,8 +71,8 @@ const EmergencyContactForm = () => {
         setSelectedLevel('medium');
     };
 
-    const handleDeleteContact = (id: string) => {
-        setContacts(contacts.filter(contact => contact.id !== id));
+    const handleDeleteContact = (id: number) => {
+        setContacts(contacts.filter(contact => contact.id));
     };
 
     const getLevelColor = (level: string) => {
@@ -85,18 +107,18 @@ const EmergencyContactForm = () => {
 
                 <Text style={styles.label}>Priority Level:</Text>
                 <View style={styles.radioGroup}>
-                    {['high', 'medium', 'low'].map((level) => (
+                    {['high', 'medium', 'low'].map((niveau) => (
                         <TouchableOpacity
-                            key={level}
+                            key={niveau}
                             style={[
                                 styles.radioButton,
-                                { backgroundColor: getLevelColor(level) },
-                                selectedLevel === level && styles.radioButtonSelected
+                                { backgroundColor: getLevelColor(niveau) },
+                                selectedLevel === niveau && styles.radioButtonSelected
                             ]}
-                            onPress={() => setSelectedLevel(level as 'high' | 'medium' | 'low')}
+                            onPress={() => setSelectedLevel(niveau as 'high' | 'medium' | 'low')}
                         >
                             <Text style={styles.radioText}>
-                                {level.charAt(0).toUpperCase() + level.slice(1)}
+                                {niveau.charAt(0).toUpperCase() + niveau.slice(1)}
                             </Text>
                         </TouchableOpacity>
                     ))}
@@ -111,17 +133,17 @@ const EmergencyContactForm = () => {
             </View>
 
             <View style={styles.contactsList}>
-                {contacts.map((contact) => (
+                {contactsInfo && contactsInfo.map((contact:EmergencyContact) => (
                     <View key={contact.id} style={styles.contactCard}>
                         <View style={styles.contactInfo}>
                             <Text style={styles.contactName}>{contact.name}</Text>
                             <View 
                                 style={[
                                     styles.levelIndicator,
-                                    { backgroundColor: getLevelColor(contact.level) }
+                                    { backgroundColor: getLevelColor(contact.niveau) }
                                 ]}
                             >
-                                <Text style={styles.levelText}>{contact.level}</Text>
+                                <Text style={styles.levelText}>{contact.niveau}</Text>
                             </View>
                         </View>
                         <TouchableOpacity

@@ -6,8 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Linking,
+  Alert,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { EmergencyContact } from "@/scripts/interfaces";
+import { useAuth } from "@/context/AuthContex";
 
 interface EmergencyModalProps {
   accuracy: number;
@@ -16,10 +20,7 @@ interface EmergencyModalProps {
   onClose: () => void;
 }
 
-interface EmergencyContact {
-  name: string;
-  phone: string;
-}
+
 
 const EmergencyModal: React.FC<EmergencyModalProps> = ({
   accuracy,
@@ -30,11 +31,9 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
   // Round accuracy to 2 decimal places
   const roundedAccuracy = Math.round(accuracy * 100) / 100;
 
-  // Mock emergency contacts - in a real app, these would come from props or context
-  const emergencyContacts: EmergencyContact[] = [
-    { name: "Emergency Contact 1", phone: "123-456-7890" },
-    { name: "Emergency Contact 2", phone: "098-765-4321" },
-  ];
+  const { contactsInfo } = useAuth();
+
+ 
 
   const isToxic = label === "toxic";
   const isNotToxic = label === "not_toxic";
@@ -86,6 +85,19 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
         );
     }
 
+    const makeCall = (phoneNumber: string) => {
+        const phoneURL = `tel:${phoneNumber}`;
+        Linking.canOpenURL(phoneURL)
+          .then((supported) => {
+            if (!supported) {
+              Alert.alert("Error", "Unable to make a call on this device.");
+            } else {
+              return Linking.openURL(phoneURL);
+            }
+          })
+          .catch((err) => console.error("An error occurred", err));
+      };
+
     return (
       <View>
         <View style={[styles.alert, getAlertStyles()]}>
@@ -103,11 +115,12 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
         {(isHighConfidence || !isHighConfidence) && (
           <View style={styles.contactsContainer}>
             <Text style={styles.contactsTitle}>Emergency Contacts:</Text>
-            {emergencyContacts.map((contact, index) => (
-              <View key={index} style={styles.contactCard}>
+            {contactsInfo && contactsInfo.map((contact: EmergencyContact, index: number) => (
+              <View key={contact.id} style={styles.contactCard}>
                 <View>
                   <Text style={styles.contactName}>{contact.name}</Text>
                   <Text style={styles.contactPhone}>{contact.phone}</Text>
+                  <Text style={styles.contactPhone}>{contact.niveau}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.phoneButton}
