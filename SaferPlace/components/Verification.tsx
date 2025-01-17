@@ -12,6 +12,7 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { EmergencyContact } from "@/scripts/interfaces";
 import { useAuth } from "@/context/AuthContex";
+import * as SMS from "expo-sms";
 
 interface EmergencyModalProps {
   accuracy: number;
@@ -31,7 +32,7 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
   // Round accuracy to 2 decimal places
   const roundedAccuracy = Math.round(accuracy * 100) / 100;
 
-  const { contactsInfo } = useAuth();
+  const { contactsInfo, userInfo } = useAuth();
 
  
 
@@ -87,6 +88,7 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
 
     const makeCall = (phoneNumber: string) => {
         const phoneURL = `tel:${phoneNumber}`;
+        //check if the app supports calls
         Linking.canOpenURL(phoneURL)
           .then((supported) => {
             if (!supported) {
@@ -96,6 +98,31 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
             }
           })
           .catch((err) => console.error("An error occurred", err));
+      };
+
+      const sendSMS = async (receipient:string) => {
+        // Check if SMS is available
+        const isAvailable = await SMS.isAvailableAsync();
+        if (!isAvailable) {
+          Alert.alert("Error", "SMS is not available on this device.");
+          return;
+        }
+    
+        try {
+          const { result } = await SMS.sendSMSAsync(
+            [receipient], // Recipients as an array
+            `Hi this is ${userInfo && userInfo.name}, can you make a welfare check ? ` // message to send
+          );
+    
+          if (result === "sent") {
+            Alert.alert("Success", "Message sent successfully.");
+          } else if (result === "cancelled") {
+            Alert.alert("Cancelled", "Message sending was cancelled.");
+          }
+        } catch (error) {
+          console.error("Error sending SMS:", error);
+          Alert.alert("Error", "An error occurred while sending the SMS.");
+        }
       };
 
     return (
@@ -116,7 +143,7 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
           <View style={styles.contactsContainer}>
             <Text style={styles.contactsTitle}>Emergency Contacts:</Text>
             {contactsInfo && contactsInfo.map((contact: EmergencyContact, index: number) => (
-              <View key={contact.id} style={styles.contactCard}>
+              <View key={index} style={styles.contactCard}>
                 <View>
                   <Text style={styles.contactName}>{contact.name}</Text>
                   <Text style={styles.contactPhone}>{contact.phone}</Text>
@@ -125,7 +152,8 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
                 <TouchableOpacity
                   style={styles.phoneButton}
                   onPress={() => {
-                    /* Handle phone call */
+                    /* Handle call or send sms to an emergency Contact */
+                    sendSMS(contact.phone)
                   }}
                 >
                   <FontAwesome name="phone" size={24} color="#2196F3" />
