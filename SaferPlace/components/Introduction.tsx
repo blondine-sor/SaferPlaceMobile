@@ -65,7 +65,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 15,
     minHeight: 100,
-    width: Dimensions.get('window').width - 48,
+    width: Dimensions.get('window').width - 38,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

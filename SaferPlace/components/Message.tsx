@@ -6,29 +6,78 @@ import {
   ActivityIndicator, 
   TouchableOpacity, 
   Dimensions,
-  Animated 
+  Animated, 
+  Platform
 } from 'react-native';
+import * as Notifications from 'expo-notifications';
 
-interface Message {
-  content: string;
-}
+// Configure notification settings
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 const MessageDuJour: React.FC = () => {
-  const [message, setMessage] = useState<Message | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fadeAnim = useState(new Animated.Value(0))[0];
+  const [author, setAuthor] = useState<string>('');
+  const [quote, setQuote] = useState<string>('');
+
+  // Request notification permissions
+  useEffect(() => {
+    const requestPermissions = async () => {
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('messages', {
+          name: 'Messages',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+        });
+      }
+      
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Please enable notifications to receive daily quotes');
+      }
+    };
+
+    requestPermissions();
+  }, []);
 
   useEffect(() => {
     fetchMessage();
   }, []);
 
+  const showNotification = async (quote: string, author: string) => {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'New Quote of the Day',
+          body: `"New Quote From" - ${author}`,
+          data: { quote, author },
+        },
+        trigger: null, // Show immediately
+      });
+    } catch (error) {
+      console.error('Error showing notification:', error);
+    }
+  };
+
+  //retrieves messages of the day
   const fetchMessage = async () => {
     setLoading(true);
     try {
-      const response = await fetch('YOUR_API_ENDPOINT/message-of-the-day');
+      const response = await fetch('http://192.168.2.11:8055/get_quote');
       const data = await response.json();
-      setMessage(data);
+      setAuthor(data.author);
+      setQuote(data.quote);
+      
+      // Show notification when new quote is received
+      await showNotification(data.quote, data.author);
+      
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 500,
@@ -41,6 +90,21 @@ const MessageDuJour: React.FC = () => {
     }
   };
 
+  // Handle notification interaction
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data;
+        // Handle what happens when user taps the notification
+        console.log('Notification tapped:', data);
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   const refreshMessage = () => {
     Animated.timing(fadeAnim, {
       toValue: 0,
@@ -51,10 +115,11 @@ const MessageDuJour: React.FC = () => {
     });
   };
 
+  
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.title}>Message du Jour</Text>
+        <Text style={styles.title}>Message of the Day : {author}  </Text>
         
         {loading ? (
           <View style={styles.loadingContainer}>
@@ -67,7 +132,7 @@ const MessageDuJour: React.FC = () => {
         ) : (
           <Animated.View style={[styles.messageContainer, { opacity: fadeAnim }]}>
             <Text style={styles.messageText}>
-              {message?.content}
+              {quote}
             </Text>
           </Animated.View>
         )}
@@ -94,7 +159,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 20,
-    width: Dimensions.get('window').width - 32,
+    width: Dimensions.get('window').width - 30,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -142,7 +207,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   refreshButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#63e8bf',
     padding: 12,
     borderRadius: 8,
     marginTop: 20,
@@ -154,5 +219,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
 
 export default MessageDuJour;

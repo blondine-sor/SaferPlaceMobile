@@ -13,6 +13,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "notification": {
+      "icon": "./assets/images/notif_icon.png",
+      "color": "#FFFFFF"
+    },
     "ios": {
       "supportsTablet": true
     },
