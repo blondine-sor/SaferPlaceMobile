@@ -16,7 +16,7 @@ import Alert from "@/components/Alerte";
 import LoginScreen from "@/components/UserConnection";
 import { useAuth } from "@/context/AuthContex";
 import EmergencyModal from "@/components/Verification";
-import { set } from "mongoose";
+import ChatBot from "@/components/ChatBot";
 
 export default function TabTwoScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -95,7 +95,7 @@ export default function TabTwoScreen() {
   const addUser = async (user: UserFormData) => {
     if (user.name && user.email && user.password && user.phone) {
       try {
-        const response = await fetch("http://192.168.2.11:8000/add_user", {
+        const response = await fetch("https://saferplaceserver.onrender.com/add_user", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -132,6 +132,8 @@ export default function TabTwoScreen() {
   };
   return (
     <View style={styles.container}>
+      {/** Buton to add a user appears only when no user is connected */}
+      {!userInfo && 
       <View style={{ flex: 1, alignItems: "flex-end" }}>
         <Button
           title="New User"
@@ -145,11 +147,15 @@ export default function TabTwoScreen() {
           onSubmit={addUser}
         />
       </View>
+}
       <View style={{ flex: 1, alignItems: "center" }}>
         {/* Shows the connected user's name  */}
         {userInfo && <Text style={styles.title}>Hello {userInfo.name}</Text>}
         {!userInfo && <Text style={styles.title}>Hello User</Text>}
+
+        <ChatBot/>
       </View>
+
       <View
         style={styles.separator}
         lightColor="#eee"
@@ -181,6 +187,7 @@ export default function TabTwoScreen() {
             onClose={() => setLoginVisible(false)}
           />
         </TouchableOpacity>
+      
       </View>
       {/* Multiupload form for user to enter text document or audio to be verified */}
       <View style={{ flex: 1, justifyContent: "flex-end" }}>
@@ -221,6 +228,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
+    padding:15
   },
   separator: {
     marginVertical: 30,

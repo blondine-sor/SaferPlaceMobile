@@ -53,7 +53,7 @@ const EmergencyContactForm = () => {
         try{
 
         
-        const response = await fetch('http://192.168.2.11:8000/add_emergency_contact', {
+        const response = await fetch('https://saferplaceserver.onrender.com/add_emergency_contact', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,14 +65,20 @@ const EmergencyContactForm = () => {
         console.error('Failed to add emergency contact:', error);
     }
 
-        setContacts([...contacts, newContact]);
+        setContacts([...(Array.isArray(contactsInfo) ? contactsInfo : contacts), newContact]);
         setName('');
         setPhone('');
         setSelectedLevel('medium');
     };
+     
+    const deleteContact = async(id:number) =>{
+    
+        
 
+    }
     const handleDeleteContact = (id: number) => {
-        setContacts(contacts.filter(contact => contact.id));
+        setContacts(Array.isArray(contactsInfo) ? contactsInfo.filter(contact => contact.id !== id) : []);
+        console.log(id)
     };
 
     const getLevelColor = (level: string) => {

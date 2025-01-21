@@ -70,7 +70,7 @@ const MessageDuJour: React.FC = () => {
   const fetchMessage = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.2.11:8055/get_quote');
+      const response = await fetch('https://motivationalquotesapi.onrender.com/get_quote');
       const data = await response.json();
       setAuthor(data.author);
       setQuote(data.quote);

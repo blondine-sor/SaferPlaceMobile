@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getToken } from './secureStorage';
 
 const apiClient = axios.create({
-  baseURL: 'http://192.168.2.11:8000/',
+  baseURL: 'https://saferplaceserver.onrender.com/',
 });
 
 apiClient.interceptors.request.use(async (config) => {
