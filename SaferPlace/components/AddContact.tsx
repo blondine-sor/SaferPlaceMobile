@@ -70,15 +70,39 @@ const EmergencyContactForm = () => {
         setPhone('');
         setSelectedLevel('medium');
     };
-     
+    //Deletes an emergency contact 
     const deleteContact = async(id:number) =>{
-    
+
+        const data = {
+            "user_id": userInfo?.id,
+            "contact_id": id
+        }
+
+
         
+        try{
+
+        const response = await fetch('https://saferplaceserver.onrender.com/users/me/contacts', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        console.log('response:', response.status);
+    } catch (error) {
+        console.error('Failed to delete emergency contact:', error);
+    }
+
+        
+    
+
 
     }
     const handleDeleteContact = (id: number) => {
         setContacts(Array.isArray(contactsInfo) ? contactsInfo.filter(contact => contact.id !== id) : []);
         console.log(id)
+        deleteContact(id)
     };
 
     const getLevelColor = (level: string) => {
