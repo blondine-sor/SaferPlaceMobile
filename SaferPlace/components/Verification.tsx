@@ -39,7 +39,7 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
   const isToxic = label === "toxic";
   const isNotToxic = label === "not_toxic";
   const isHighConfidence = roundedAccuracy >= 0.75;
-  const isLowConfidence = roundedAccuracy >= 85;
+  const isLowConfidence = roundedAccuracy >= 0.80;
 
   const getAlertStyles = () => {
     if (isToxic && isHighConfidence) {
@@ -61,6 +61,9 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({
       return styles.yellowText;
     } else if (isNotToxic && !isLowConfidence) {
       return styles.yellowText;
+    }
+    else if(isNotToxic && isLowConfidence){
+      return styles.greenText;
     }
     return styles.greenText;
   };

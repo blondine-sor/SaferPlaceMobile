@@ -17,6 +17,7 @@ import LoginScreen from "@/components/UserConnection";
 import { useAuth } from "@/context/AuthContex";
 import EmergencyModal from "@/components/Verification";
 import ChatBot from "@/components/ChatBot";
+import EmergencyButton from "@/components/Emergencies";
 
 export default function TabTwoScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -75,7 +76,7 @@ export default function TabTwoScreen() {
           );
 
           const data = await response.json();
-          console.log(data)
+          console.log(data);
 
           if (response.ok) {
             setLabel(data.label);
@@ -95,13 +96,16 @@ export default function TabTwoScreen() {
   const addUser = async (user: UserFormData) => {
     if (user.name && user.email && user.password && user.phone) {
       try {
-        const response = await fetch("https://saferplaceserver.onrender.com/add_user", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(user),
-        });
+        const response = await fetch(
+          "https://saferplaceserver.onrender.com/add_user",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(user),
+          }
+        );
         const data = await response.json();
         console.log("User added:", data);
         if (data.status === "user added") {
@@ -133,27 +137,30 @@ export default function TabTwoScreen() {
   return (
     <View style={styles.container}>
       {/** Buton to add a user appears only when no user is connected */}
-      {!userInfo && 
-      <View style={{ flex: 1, alignItems: "flex-end" }}>
-        <Button
-          title="New User"
-          color={"#44d575"}
-          onPress={() => setModalVisible(true)}
-        />
+      {!userInfo && (
+        <View style={{ flex: 1, alignItems: "flex-end" }}>
+          <Button
+            title="New User"
+            color={"#44d575"}
+            onPress={() => setModalVisible(true)}
+          />
 
-        <UserFormModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          onSubmit={addUser}
-        />
-      </View>
-}
+          <UserFormModal
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            onSubmit={addUser}
+          />
+        </View>
+      )}
+      {userInfo && (
+        <View style={{ flex: 1, alignItems: "flex-end" }}>
+          <EmergencyButton/>
+        </View>
+      )}
       <View style={{ flex: 1, alignItems: "center" }}>
         {/* Shows the connected user's name  */}
         {userInfo && <Text style={styles.title}>Hello {userInfo.name}</Text>}
         {!userInfo && <Text style={styles.title}>Hello User</Text>}
-
-        <ChatBot/>
       </View>
 
       <View
@@ -187,7 +194,7 @@ export default function TabTwoScreen() {
             onClose={() => setLoginVisible(false)}
           />
         </TouchableOpacity>
-      
+        <ChatBot />
       </View>
       {/* Multiupload form for user to enter text document or audio to be verified */}
       <View style={{ flex: 1, justifyContent: "flex-end" }}>
@@ -228,7 +235,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    padding:15
+    padding: 15,
   },
   separator: {
     marginVertical: 30,

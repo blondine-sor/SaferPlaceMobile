@@ -75,6 +75,7 @@ const MessageDuJour: React.FC = () => {
       setAuthor(data.author);
       setQuote(data.quote);
       
+      
       // Show notification when new quote is received
       await showNotification(data.quote, data.author);
       

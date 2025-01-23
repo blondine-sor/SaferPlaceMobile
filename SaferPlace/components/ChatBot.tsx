@@ -12,6 +12,7 @@ import {
   StyleSheet 
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { useAuth } from '@/context/AuthContex';
 
 interface Message {
   id: string;
@@ -26,6 +27,7 @@ export const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const { userInfo } = useAuth()
 
   // Animation for opening/closing the chat window
   useEffect(() => {
@@ -35,7 +37,7 @@ export const ChatBot = () => {
     }).start();
   }, [isOpen]);
 
-  const handleSend = () => {
+  const handleSend = async() => {
     if (message.trim()) {
       const newMessage: Message = {
         id: Date.now().toString(),
@@ -47,16 +49,47 @@ export const ChatBot = () => {
       setMessages(prev => [...prev, newMessage]);
       setMessage('');
 
+      
+
+      const user_query={
+        "user_id": userInfo?.id || 0,
+        "username": userInfo?.name || "",
+        "query":newMessage.text 
+      }
+      try{
+       const response = await fetch('http://192.168.2.11:8060/chat',{
+        method: 'POST',
+        headers:{
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user_query),
+       })
+
+       const data = await response.json()
+       console.log('response:',data.response)
+    
       // Simulate bot response (replace with actual bot logic)
       setTimeout(() => {
         const botResponse: Message = {
           id: (Date.now() + 1).toString(),
-          text: "Thanks for your message! I'll help you with that.",
+          text: data.response.answer,
           isBot: true,
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, botResponse]);
       }, 1000);
+    }catch(error){
+        console.error("Error sending message:", error);
+        // Add error message
+        const errorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: 'Sorry, I encountered an error. Please try again.',
+            isBot: true,
+            timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errorMessage]);
+
+    }
     }
   };
 
@@ -140,7 +173,7 @@ export const ChatBot = () => {
 
           {/* Input area */}
           <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            behavior={Platform.OS === "android" ? "padding" : "height"}
             style={styles.inputContainer}
           >
             <TextInput
@@ -174,7 +207,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#28b709',
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -240,7 +273,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 5,
   },
   userMessage: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#54a444',
     alignSelf: 'flex-end',
     borderBottomRightRadius: 5,
   },
@@ -281,7 +314,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   sendButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#28b709',
     width: 40,
     height: 40,
     borderRadius: 20,
