@@ -24,7 +24,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/saferp_icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.blond27.SaferPlace"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +37,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "fd37ea61-fedb-4fed-885b-f68837450de5"
+      }
     }
   }
 }
