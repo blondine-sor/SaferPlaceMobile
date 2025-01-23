@@ -57,7 +57,7 @@ export const ChatBot = () => {
         "query":newMessage.text 
       }
       try{
-       const response = await fetch('http://192.168.2.11:8060/chat',{
+       const response = await fetch('https://safeteechatbot.onrender.com/chat',{
         method: 'POST',
         headers:{
             "Content-Type": "application/json",
@@ -132,7 +132,7 @@ export const ChatBot = () => {
               style={styles.botImage}
               source={require('../assets/images/safetee.png')} 
             />
-            <Text style={styles.headerText}>Chat Assistant</Text>
+            <Text style={styles.headerText}>Chat Assistant: Safetee</Text>
             <TouchableOpacity onPress={() => setIsOpen(false)}>
               <FontAwesome name="times" size={24} color="#666" />
             </TouchableOpacity>
